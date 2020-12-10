@@ -13,7 +13,7 @@ export default class App extends Component {
  save() {
   const canvas = document.getElementById('paint-canvas')
   console.log('HI')
-  fetch('weatherforecast', {
+  fetch('picture', {
    method: 'POST',
    headers: {
     'Content-Type': 'application/json'
