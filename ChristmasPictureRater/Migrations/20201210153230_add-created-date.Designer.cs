@@ -4,14 +4,16 @@ using ChristmasPictureRater.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ChristmasPictureRater.Migrations
 {
     [DbContext(typeof(PictureRaterContext))]
-    partial class PictureRaterContextModelSnapshot : ModelSnapshot
+    [Migration("20201210153230_add-created-date")]
+    partial class addcreateddate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -28,18 +28,43 @@ namespace ChristmasPictureRater.Controllers
         [HttpGet]
         public DrawingDto[] Get()
         {
-            return this._db.Drawings.Select(d => new DrawingDto(d.Image, d.Category, d.ArtistsName, d.Likes)).ToArray();
+            return this._db.Drawings.Select(d => new DrawingDto(d)).ToArray();
         }
 
+        [HttpGet]
+        [Route("compare")]
+        public RateDrawingsDto GetForRating()
+        {
+            //  var randomCategory = EnumHelper<Categories>.GetRandom();
+            var allDrawings = _db.Drawings.Where(c => c.Category == Categories.Snowman).OrderBy(o => Guid.NewGuid())
+                .Take(2)
+                .ToArray();
+
+            return new RateDrawingsDto(new DrawingDto(allDrawings[0]), new DrawingDto(allDrawings[1]));
+        }
+
+
         [HttpPost]
+        [Route("upload")]
         public async Task<IActionResult> Upload([FromBody] Upload data)
         {
             this._db.Drawings.Add(new Drawing()
             {
-                Image = data.Img,
+                Image = data.Image,
                 Category = Categories.Snowman,
-                ArtistsName = "Unknown"
+                ArtistsName = "Unknown",
+                CreatedDate = DateTime.Now
             });
+            await this._db.SaveChangesAsync();
+            return this.Ok();
+        }
+
+        [HttpPost]
+        [Route("like/{id:int}")]
+        public async Task<IActionResult> Like(int id)
+        {
+            var drawing = this._db.Drawings.First(d => d.Id == id);
+            drawing.Likes++;
             await this._db.SaveChangesAsync();
             return this.Ok();
         }
@@ -47,6 +72,18 @@ namespace ChristmasPictureRater.Controllers
 
     public class Upload
     {
-        public string Img { get; set; }
+        public string Image { get; set; }
+        public string ArtistName { get; set; }
+    }
+
+    public static class EnumHelper<T>
+    {
+        public static T GetRandom()
+        {
+            Array values = Enum.GetValues(typeof(T));
+            Random random = new Random();
+            T randomBar = (T) values.GetValue(random.Next(values.Length));
+            return randomBar;
+        }
     }
 }

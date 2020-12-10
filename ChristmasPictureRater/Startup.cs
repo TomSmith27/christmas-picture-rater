@@ -2,11 +2,13 @@ using ChristmasPictureRater.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.SpaServices;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using VueCliMiddleware;
 
 namespace ChristmasPictureRater
 {
@@ -22,21 +24,16 @@ namespace ChristmasPictureRater
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllersWithViews();
 
             // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/dist"; });
 
             services.AddSwaggerGen();
 
-            
+
             services.AddDbContext<PictureRaterContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,26 +57,31 @@ namespace ChristmasPictureRater
             app.UseRouting();
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); });
-            
-            
-            
-            
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
-            });
+
+
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "ClientApp";
-
+#if DEBUG
                 if (env.IsDevelopment())
                 {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
+                    spa.UseVueCli(npmScript: "serve", port: 8080); // optional port
                 }
+#endif
             });
+
+
+            /*app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp2";
+    
+                if (env.IsDevelopment())
+                {
+                    spa.UseReactDevelopmentServer(npmScript: "serve");
+                }
+            });*/
         }
     }
 }
