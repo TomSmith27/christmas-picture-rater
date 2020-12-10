@@ -1,13 +1,17 @@
 ﻿<template>
  <div class="container">
 	<h1>Draw a {{ category }}</h1>
-	<canvas ref="canvas" @mousedown="onMouseDown" @mousemove="onMouseMove" @mouseup="onMouseUp" width="300" height="400"
+	<canvas ref="canvas" @toucMove="onMouseMove" @mousedown="onMouseDown" @mousemove="onMouseMove" @mouseup="onMouseUp"
+					width="300" height="400"
 					id="paint-canvas"></canvas>
 	<div id="paint-canvas-controls">
 	 <input @change="onColourChange" v-model="colour" class="form-control" type="color" />
-	 <b-icon-brush></b-icon-brush>
-	 <input @change="onBrushSizeChange" type="range" min="1" max="5" v-model="brushSize">
-	 {{ brushSize }}
+	 <b-button-group class="my-2 w-100" >
+		<b-button :pressed="size === brushSize" squared @click="changeBrushSize(size)"
+							:variant="size == brushSize ? 'primary' : 'outline-primary'" v-for="size in 5">
+		 <b-icon-circle-fill :scale="0.2 * size" :shift-v="-(size * 0.2)" />
+		</b-button>
+	 </b-button-group>
 	</div>
 	<b-button @click="submit" block variant="success">Submit</b-button>
  </div>
@@ -28,8 +32,8 @@ export default draw.extend({
         x: 0,
         y: 0
       },
-      colour: '#000000',
       brushSize: 1,
+      colour: '#000000',
       category: 'Snowman'
     }
   },
@@ -38,6 +42,9 @@ export default draw.extend({
       return this.$refs.canvas.getContext("2d")!
     },
   },
+  mounted() {
+    this.handleTouchInput();
+  },
   methods: {
     setMouseCoordinates(event: MouseEvent) {
       const boundings = this.$refs.canvas.getBoundingClientRect();
@@ -45,6 +52,7 @@ export default draw.extend({
       this.mouse.y = event.clientY - boundings.top;
     },
     onMouseDown(event: MouseEvent) {
+
       this.setMouseCoordinates(event);
       this.isDrawing = true;
 
@@ -67,17 +75,42 @@ export default draw.extend({
     onColourChange() {
       this.context.strokeStyle = this.colour;
     },
-    onBrushSizeChange() {
-      this.context.lineWidth = this.brushSize * 3
+    changeBrushSize(brushSize: number) {
+      this.brushSize = brushSize;
+      this.context.lineWidth = brushSize * 3
+    },
+    handleTouchInput() {
+      const canvas = this.$refs.canvas;
+      // Set up touch events for mobile, etc
+      canvas.addEventListener("touchstart", function (e) {
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousedown", {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      }, false);
+      canvas.addEventListener("touchend", function (e) {
+        const mouseEvent = new MouseEvent("mouseup", {});
+        canvas.dispatchEvent(mouseEvent);
+      }, false);
+      canvas.addEventListener("touchmove", function (e) {
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousemove", {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      }, false);
     },
     async submit() {
       await Axios.post('picture/upload', {
         image: this.$refs.canvas.toDataURL(),
         artistName: 'test'
       }).catch(alert)
-			
-			alert('Thank you for your drawing')
-			
+
+      alert('Thank you for your drawing')
+
     }
   }
 })
