@@ -1,6 +1,6 @@
 ﻿<template>
  <div>
-	<h3>Who drew the best {{ category }}</h3>
+	<h3>Who drew the best {{ image1.category }}</h3>
 	<b-row class="justify-content-center align-content-center">
 	 <b-col cols="5">
 		<div class="d-flex flex-column">
@@ -33,7 +33,6 @@ export default Vue.extend({
   name: "Rate",
   data() {
     return {
-      category: 'Snowman',
       image1: {},
       image2: {}
     }

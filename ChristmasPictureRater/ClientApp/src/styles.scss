@@ -1,4 +1,13 @@
-﻿#paint-canvas {
+﻿@import url('https://fonts.googleapis.com/css2?family=Pangolin&display=swap');
+
+$font-family-base: 'Pangolin';
+
+
+@import 'node_modules/bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap-vue/src/index.scss';
+
+
+#paint-canvas {
   border: 1px solid black;
   cursor: crosshair;
 }

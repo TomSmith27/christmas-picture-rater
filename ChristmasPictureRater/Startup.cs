@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ChristmasPictureRater.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,6 +33,13 @@ namespace ChristmasPictureRater
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/dist"; });
 
             services.AddSwaggerGen();
+
+            services.AddMvcCore().AddJsonOptions(o =>
+            {
+                o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                o.JsonSerializerOptions.DictionaryKeyPolicy = null;
+                o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
 
             services.AddDbContext<PictureRaterContext>(options =>

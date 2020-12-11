@@ -6,7 +6,7 @@
 					id="paint-canvas"></canvas>
 	<div id="paint-canvas-controls">
 	 <input @change="onColourChange" v-model="colour" class="form-control" type="color" />
-	 <b-button-group class="my-2 w-100" >
+	 <b-button-group class="my-2 w-100">
 		<b-button :pressed="size === brushSize" squared @click="changeBrushSize(size)"
 							:variant="size == brushSize ? 'primary' : 'outline-primary'" v-for="size in 5">
 		 <b-icon-circle-fill :scale="0.2 * size" :shift-v="-(size * 0.2)" />
@@ -34,7 +34,8 @@ export default draw.extend({
       },
       brushSize: 1,
       colour: '#000000',
-      category: 'Snowman'
+      category: 'Snowman',
+      allCategories: []
     }
   },
   computed: {
@@ -42,7 +43,10 @@ export default draw.extend({
       return this.$refs.canvas.getContext("2d")!
     },
   },
-  mounted() {
+  async mounted() {
+    this.allCategories = (await Axios.get('picture/categories')).data
+    this.category = this.allCategories[Math.floor(Math.random() * this.allCategories.length)];
+    this.context.lineWidth = 5;
     this.handleTouchInput();
   },
   methods: {
@@ -77,7 +81,7 @@ export default draw.extend({
     },
     changeBrushSize(brushSize: number) {
       this.brushSize = brushSize;
-      this.context.lineWidth = brushSize * 3
+      this.context.lineWidth = brushSize * 5
     },
     handleTouchInput() {
       const canvas = this.$refs.canvas;
@@ -104,17 +108,35 @@ export default draw.extend({
       }, false);
     },
     async submit() {
-      await Axios.post('picture/upload', {
-        image: this.$refs.canvas.toDataURL(),
-        artistName: 'test'
-      }).catch(alert)
+      this.$bvModal.msgBoxConfirm('Are you finished drawing', {
+        centered: true
+      }).then(async (decision : boolean) => {
+        if (decision) {
+          await Axios.post('picture/upload', {
+            image: this.$refs.canvas.toDataURL(),
+            artistName: 'test',
+            category: this.category,
+          }).catch(alert)
 
-      alert('Thank you for your drawing')
+          alert('Thank you for your drawing')
+
+
+          this.context.clearRect(0, 0, this.$refs.canvas.width, this.$refs.canvas.height);
+          this.category = this.allCategories.filter(s => s != this.category)[Math.floor(Math.random() * (this.allCategories.length - 1))];
+        }
+      })
+
 
     }
   }
 })
 </script>
+<style>
+
+body {
+    overscroll-behavior: none;
+}
+</style>
 
 <!--
 window.onload = function () {

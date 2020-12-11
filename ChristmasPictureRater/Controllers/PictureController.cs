@@ -32,11 +32,18 @@ namespace ChristmasPictureRater.Controllers
         }
 
         [HttpGet]
+        [Route("categories")]
+        public Categories[]? GetAllCategories()
+        {
+            return Enum.GetValues(typeof(Categories)) as Categories[];
+        }
+
+        [HttpGet]
         [Route("compare")]
         public RateDrawingsDto GetForRating()
         {
-            //  var randomCategory = EnumHelper<Categories>.GetRandom();
-            var allDrawings = _db.Drawings.Where(c => c.Category == Categories.Snowman).OrderBy(o => Guid.NewGuid())
+            var randomCategory = EnumHelper<Categories>.GetRandom();
+            var allDrawings = _db.Drawings.Where(c => c.Category == randomCategory).OrderBy(o => Guid.NewGuid())
                 .Take(2)
                 .ToArray();
 
@@ -46,12 +53,12 @@ namespace ChristmasPictureRater.Controllers
 
         [HttpPost]
         [Route("upload")]
-        public async Task<IActionResult> Upload([FromBody] Upload data)
+        public async Task<IActionResult> Upload([FromBody] Submission data)
         {
-            this._db.Drawings.Add(new Drawing()
+            await this._db.Drawings.AddAsync(new Drawing()
             {
                 Image = data.Image,
-                Category = Categories.Snowman,
+                Category = data.Category,
                 ArtistsName = "Unknown",
                 CreatedDate = DateTime.Now
             });
@@ -70,10 +77,11 @@ namespace ChristmasPictureRater.Controllers
         }
     }
 
-    public class Upload
+    public class Submission
     {
         public string Image { get; set; }
         public string ArtistName { get; set; }
+        public Categories Category { get; set; }
     }
 
     public static class EnumHelper<T>

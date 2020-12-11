@@ -16,6 +16,9 @@ namespace ChristmasPictureRater.Models
     {
         Snowman,
         ChristmasTree,
-        Santa
+        Santa,
+        ChristmasCracker,
+        Bauble,
+        Reindeer
     }
 }
